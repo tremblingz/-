@@ -960,165 +960,258 @@ select.form-input option { background: var(--bg3); }
   </div>
 </div>
 
-<script>
-// ===== DATA STORE =====
-const USERS = {
-  // ── 管理员 (4人) ──
-  yuqianqian: { pass: 'yuqq2024', role: 'admin', name: '喻倩倩', display: '管理员' },
-  tiantian:   { pass: 'tian2024', role: 'admin', name: '田甜',   display: '管理员' },
-  pengshiqi:  { pass: 'psq2024',  role: 'admin', name: '彭仕麒', display: '管理员' },
-  zhuangchunlin: { pass: 'zcl2024', role: 'admin', name: '庄春林', display: '管理员' },
-  // ── 使用者 (25人) ──
-  huangminghui: { pass: 'hmh2024', role: 'user', name: '黄明辉', display: '使用者' },
-  wangdi:       { pass: 'wd2024',  role: 'user', name: '王迪',   display: '使用者' },
-  tianyehong:   { pass: 'tyh2024', role: 'user', name: '田野宏', display: '使用者' },
-  huangzixuan:  { pass: 'hzx2024', role: 'user', name: '黄紫萱', display: '使用者' },
-  liyidan:      { pass: 'lyd2024', role: 'user', name: '李夷丹', display: '使用者' },
-  liuyanxi:     { pass: 'lyx2024', role: 'user', name: '刘妍汐', display: '使用者' },
-  diaoshanji:   { pass: 'dsj2024', role: 'user', name: '刁善基', display: '使用者' },
-  huyilin:      { pass: 'hyl2024', role: 'user', name: '胡亦琳', display: '使用者' },
-  zhengchao:    { pass: 'zc2024',  role: 'user', name: '郑超',   display: '使用者' },
-  mingzhenxin:  { pass: 'mzx2024', role: 'user', name: '明振鑫', display: '使用者' },
-  tandan:       { pass: 'td2024',  role: 'user', name: '覃丹',   display: '使用者' },
-  wangyiling:   { pass: 'wyl2024', role: 'user', name: '王艺颖', display: '使用者' },
-  zhoumo:       { pass: 'zm2024',  role: 'user', name: '周末',   display: '使用者' },
-  xuesa:        { pass: 'xs2024',  role: 'user', name: '薛莎',   display: '使用者' },
-  wangyuxi:     { pass: 'wyx2024', role: 'user', name: '王宇僖', display: '使用者' },
-  zhangzhixuan: { pass: 'zzx2024', role: 'user', name: '张芷萱', display: '使用者' },
-  weiruyi:     { pass: 'wry2024', role: 'user', name: '魏如饴', display: '使用者' },
-  xiongsicheng: { pass: 'xsc2024', role: 'user', name: '熊思城', display: '使用者' },
-  fanhanbing:   { pass: 'fhb2024', role: 'user', name: '樊寒冰', display: '使用者' },
-  koulu:        { pass: 'kl2024',  role: 'user', name: '寇璐',   display: '使用者' },
-  chenzhiyu:    { pass: 'czy2024', role: 'user', name: '陈志宇', display: '使用者' },
-  wangzihao:    { pass: 'wzh2024', role: 'user', name: '王子浩', display: '使用者' },
-  shiyihua:     { pass: 'syh2024', role: 'user', name: '史义华', display: '使用者' },
-  tianyuan:     { pass: 'ty2024',  role: 'user', name: '田源',   display: '使用者' },
-  wufenghua:    { pass: 'wfh2024', role: 'user', name: '吴凤华', display: '使用者' },
+<script type="module">
+// ===== FIREBASE SETUP =====
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getFirestore, collection, doc, getDocs, getDoc, addDoc, setDoc,
+  updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAjsxgwjfrTSXn9rv9Y8Gpz9yRWuys5Y4k",
+  authDomain: "warehouse-ctgceccb.firebaseapp.com",
+  projectId: "warehouse-ctgceccb",
+  storageBucket: "warehouse-ctgceccb.firebasestorage.app",
+  messagingSenderId: "369614246949",
+  appId: "1:369614246949:web:3789e8faadbf135a6cdbcc"
 };
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== DATA STORE =====
+const USERS = {
+  yuqianqian:    { pass: 'yuqq2024', role: 'admin', name: '喻倩倩', display: '管理员' },
+  tiantian:      { pass: 'tian2024', role: 'admin', name: '田甜',   display: '管理员' },
+  pengshiqi:     { pass: 'psq2024',  role: 'admin', name: '彭仕麒', display: '管理员' },
+  zhuangchunlin: { pass: 'zcl2024',  role: 'admin', name: '庄春林', display: '管理员' },
+  huangminghui:  { pass: 'hmh2024',  role: 'user',  name: '黄明辉', display: '使用者' },
+  wangdi:        { pass: 'wd2024',   role: 'user',  name: '王迪',   display: '使用者' },
+  tianyehong:    { pass: 'tyh2024',  role: 'user',  name: '田野宏', display: '使用者' },
+  huangzixuan:   { pass: 'hzx2024',  role: 'user',  name: '黄紫萱', display: '使用者' },
+  liyidan:       { pass: 'lyd2024',  role: 'user',  name: '李夷丹', display: '使用者' },
+  liuyanxi:      { pass: 'lyx2024',  role: 'user',  name: '刘妍汐', display: '使用者' },
+  diaoshanji:    { pass: 'dsj2024',  role: 'user',  name: '刁善基', display: '使用者' },
+  huyilin:       { pass: 'hyl2024',  role: 'user',  name: '胡亦琳', display: '使用者' },
+  zhengchao:     { pass: 'zc2024',   role: 'user',  name: '郑超',   display: '使用者' },
+  mingzhenxin:   { pass: 'mzx2024',  role: 'user',  name: '明振鑫', display: '使用者' },
+  tandan:        { pass: 'td2024',   role: 'user',  name: '覃丹',   display: '使用者' },
+  wangyiling:    { pass: 'wyl2024',  role: 'user',  name: '王艺颖', display: '使用者' },
+  zhoumo:        { pass: 'zm2024',   role: 'user',  name: '周末',   display: '使用者' },
+  xuesa:         { pass: 'xs2024',   role: 'user',  name: '薛莎',   display: '使用者' },
+  wangyuxi:      { pass: 'wyx2024',  role: 'user',  name: '王宇僖', display: '使用者' },
+  zhangzhixuan:  { pass: 'zzx2024',  role: 'user',  name: '张芷萱', display: '使用者' },
+  weiruyi:       { pass: 'wry2024',  role: 'user',  name: '魏如饴', display: '使用者' },
+  xiongsicheng:  { pass: 'xsc2024',  role: 'user',  name: '熊思城', display: '使用者' },
+  fanhanbing:    { pass: 'fhb2024',  role: 'user',  name: '樊寒冰', display: '使用者' },
+  koulu:         { pass: 'kl2024',   role: 'user',  name: '寇璐',   display: '使用者' },
+  chenzhiyu:     { pass: 'czy2024',  role: 'user',  name: '陈志宇', display: '使用者' },
+  wangzihao:     { pass: 'wzh2024',  role: 'user',  name: '王子浩', display: '使用者' },
+  shiyihua:      { pass: 'syh2024',  role: 'user',  name: '史义华', display: '使用者' },
+  tianyuan:      { pass: 'ty2024',   role: 'user',  name: '田源',   display: '使用者' },
+  wufenghua:     { pass: 'wfh2024',  role: 'user',  name: '吴凤华', display: '使用者' },
+};
+
+// 初始物资数据（首次初始化时写入 Firestore）
+const INITIAL_INVENTORY = [
+  { id:'1',  name:'记事贴',         category:'办公用品', qty:73,  safeQty:20, unit:'包', supplier:'', note:'第一批' },
+  { id:'2',  name:'名字贴',         category:'办公用品', qty:38,  safeQty:10, unit:'包', supplier:'', note:'第一批' },
+  { id:'3',  name:'小木子',         category:'办公用品', qty:5,   safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'4',  name:'起订器',         category:'办公用品', qty:38,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
+  { id:'5',  name:'固体胶',         category:'办公用品', qty:19,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
+  { id:'6',  name:'A4纸',           category:'办公用品', qty:44,  safeQty:20, unit:'包', supplier:'', note:'第一批' },
+  { id:'7',  name:'A3纸',           category:'办公用品', qty:4,   safeQty:3,  unit:'包', supplier:'', note:'第一批' },
+  { id:'8',  name:'订书机',         category:'办公用品', qty:10,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'9',  name:'计算器',         category:'办公用品', qty:1,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
+  { id:'10', name:'伸缩美工刀',     category:'办公用品', qty:17,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'11', name:'桌面大笔筒',     category:'办公用品', qty:5,   safeQty:3,  unit:'个', supplier:'', note:'第一批' },
+  { id:'12', name:'双面胶',         category:'办公用品', qty:45,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
+  { id:'13', name:'中性笔（粗）',   category:'办公用品', qty:15,  safeQty:10, unit:'盒', supplier:'', note:'第一批' },
+  { id:'14', name:'电池9v',         category:'办公用品', qty:7,   safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'15', name:'插板',           category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'16', name:'文件夹 蓝',      category:'办公用品', qty:13,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'17', name:'透明文件夹',     category:'办公用品', qty:16,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'18', name:'蓝色资料册 粘',  category:'办公用品', qty:19,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'19', name:'抽杆文件夹',     category:'办公用品', qty:9,   safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'20', name:'A4红纸',         category:'办公用品', qty:2,   safeQty:2,  unit:'包', supplier:'', note:'第一批' },
+  { id:'21', name:'logo大本子',     category:'办公用品', qty:4,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
+  { id:'22', name:'A4黄纸',         category:'办公用品', qty:23,  safeQty:5,  unit:'包', supplier:'', note:'第一批' },
+  { id:'23', name:'A4绿纸',         category:'办公用品', qty:1,   safeQty:2,  unit:'包', supplier:'', note:'第一批' },
+  { id:'24', name:'外科手术罩',     category:'安全防护', qty:5,   safeQty:5,  unit:'盒', supplier:'', note:'第一批' },
+  { id:'25', name:'防护口罩',       category:'安全防护', qty:4,   safeQty:3,  unit:'盒', supplier:'', note:'第一批' },
+  { id:'26', name:'抹布',           category:'清洁用品', qty:2,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
+  { id:'27', name:'枕套',           category:'其他',     qty:14,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'28', name:'清洁手套',       category:'清洁用品', qty:2,   safeQty:2,  unit:'双', supplier:'', note:'第一批' },
+  { id:'29', name:'羽毛球',         category:'其他',     qty:9,   safeQty:5,  unit:'筒', supplier:'', note:'第一批' },
+  { id:'30', name:'外科手套橡胶',   category:'安全防护', qty:2,   safeQty:2,  unit:'双', supplier:'', note:'第一批' },
+  { id:'31', name:'一次性手套',     category:'安全防护', qty:2,   safeQty:2,  unit:'双', supplier:'', note:'第一批' },
+  { id:'32', name:'红外测温计',     category:'医疗耗材', qty:3,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
+  { id:'33', name:'较钞本',         category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'34', name:'装订铆管',       category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'35', name:'黑色铆盒',       category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'36', name:'佳能墨粉黄色',   category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'37', name:'佳能墨粉黑色',   category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'38', name:'佳能墨粉青色',   category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'39', name:'惠普墨粉品红色', category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'40', name:'板夹 黑',        category:'办公用品', qty:27,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'41', name:'晾衣杆',         category:'其他',     qty:2,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
+  { id:'42', name:'洁丽雅毛巾 白',  category:'清洁用品', qty:25,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
+  { id:'43', name:'厨房刀具',       category:'其他',     qty:1,   safeQty:1,  unit:'套', supplier:'', note:'第一批' },
+  { id:'44', name:'烟灰缸',         category:'其他',     qty:18,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
+  { id:'45', name:'力顿纸6.5寸 白', category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
+  { id:'46', name:'快干印油红',     category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
+  { id:'47', name:'抽针夹',         category:'办公用品', qty:30,  safeQty:10, unit:'个', supplier:'', note:'第二批' },
+  { id:'48', name:'收纳箱带盖',     category:'其他',     qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'49', name:'信纸',           category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'50', name:'档案盒 蓝',      category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'51', name:'档案盒 深灰',    category:'办公用品', qty:10,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'52', name:'皮面笔记本 黑',  category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'53', name:'皮面笔记本 棕',  category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'54', name:'皮面笔记本 蓝',  category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'55', name:'百乐啫喱笔0.5黑',category:'办公用品', qty:20,  safeQty:10, unit:'支', supplier:'', note:'第二批' },
+  { id:'56', name:'A4红纸（二批）', category:'办公用品', qty:1,   safeQty:2,  unit:'包', supplier:'', note:'第二批' },
+  { id:'57', name:'严重洗手液',     category:'清洁用品', qty:1,   safeQty:2,  unit:'瓶', supplier:'', note:'第二批' },
+  { id:'58', name:'插板（二批）',   category:'办公用品', qty:2,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
+  { id:'59', name:'A4黄纸（二批）', category:'办公用品', qty:4,   safeQty:2,  unit:'包', supplier:'', note:'第二批' },
+  { id:'60', name:'超拼垃圾袋',     category:'清洁用品', qty:200, safeQty:50, unit:'个', supplier:'', note:'第二批' },
+  { id:'61', name:'削皮刀',         category:'其他',     qty:8,   safeQty:3,  unit:'把', supplier:'', note:'第二批' },
+  { id:'62', name:'美工刀 黄',      category:'办公用品', qty:4,   safeQty:2,  unit:'把', supplier:'', note:'第二批' },
+  { id:'63', name:'折叠便携小推车', category:'其他',     qty:1,   safeQty:1,  unit:'辆', supplier:'', note:'第二批' },
+  { id:'64', name:'南孚7号电池',    category:'办公用品', qty:10,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'65', name:'液体胶水',       category:'办公用品', qty:24,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'66', name:'双刃剪刀',       category:'办公用品', qty:48,  safeQty:10, unit:'个', supplier:'', note:'第二批' },
+  { id:'67', name:'桌面计算器',     category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
+  { id:'68', name:'小米5号电池',    category:'办公用品', qty:100, safeQty:20, unit:'个', supplier:'', note:'第二批' },
+  { id:'69', name:'希捷 移动硬盘',  category:'电子设备', qty:8,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
+  { id:'70', name:'网格拉链袋',     category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'71', name:'激光笔',         category:'办公用品', qty:4,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
+  { id:'72', name:'财务银行收滋章', category:'办公用品', qty:2,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
+  { id:'73', name:'附件章',         category:'办公用品', qty:6,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
+  { id:'74', name:'校准器',         category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
+  { id:'75', name:'闪迪u盘64g',     category:'电子设备', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'76', name:'印台',           category:'办公用品', qty:5,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
+  { id:'77', name:'半径麦克风 全向', category:'电子设备', qty:2,  safeQty:1,  unit:'个', supplier:'', note:'第二批' },
+  { id:'78', name:'得力中性笔0.5',  category:'办公用品', qty:96,  safeQty:20, unit:'支', supplier:'', note:'第二批' },
+  { id:'79', name:'得力剪刀',       category:'办公用品', qty:20,  safeQty:5,  unit:'把', supplier:'', note:'第二批' },
+  { id:'80', name:'美工刀',         category:'办公用品', qty:20,  safeQty:5,  unit:'把', supplier:'', note:'第二批' },
+  { id:'81', name:'扫把簸箕套装',   category:'清洁用品', qty:2,   safeQty:2,  unit:'套', supplier:'', note:'第二批' },
+  { id:'82', name:'拖把',           category:'清洁用品', qty:2,   safeQty:2,  unit:'把', supplier:'', note:'第二批' },
+  { id:'83', name:'起钉器',         category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'84', name:'固体胶（二批）', category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'85', name:'便利贴',         category:'办公用品', qty:5,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
+  { id:'86', name:'订书机（二批）', category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
+  { id:'87', name:'回形针',         category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
+  { id:'88', name:'彩色名片夹',     category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
+  { id:'89', name:'尾票夹 简装',    category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
+  { id:'90', name:'组合票夹',       category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
+  { id:'91', name:'A4透明文件袋',   category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'92', name:'A4文件筐',       category:'办公用品', qty:30,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'93', name:'A4黄纸（三）',   category:'办公用品', qty:1,   safeQty:2,  unit:'包', supplier:'', note:'第二批' },
+  { id:'94', name:'A4纸（二批）',   category:'办公用品', qty:55,  safeQty:20, unit:'包', supplier:'', note:'第二批' },
+  { id:'95', name:'笔记本',         category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'96', name:'晨光红色签字笔', category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
+  { id:'97', name:'保温壶',         category:'其他',     qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
+  { id:'98', name:'电水壶',         category:'其他',     qty:4,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
+  { id:'99', name:'复印纸',         category:'办公用品', qty:5,   safeQty:2,  unit:'箱', supplier:'', note:'第二批' },
+  { id:'100',name:'圆形垃圾桶',     category:'清洁用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
+  { id:'101',name:'面巾抽纸',       category:'清洁用品', qty:2,   safeQty:2,  unit:'箱', supplier:'', note:'第二批' },
+  { id:'102',name:'公牛排班',       category:'办公用品', qty:30,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
+  { id:'103',name:'硒鼓',           category:'办公用品', qty:3,   safeQty:1,  unit:'盒', supplier:'', note:'第二批' },
+  { id:'104',name:'三菱红笔0.5',    category:'办公用品', qty:24,  safeQty:5,  unit:'支', supplier:'', note:'第二批' },
+  { id:'105',name:'三菱黑笔0.5',    category:'办公用品', qty:12,  safeQty:5,  unit:'支', supplier:'', note:'第二批' },
+];
+
+// ===== STATE =====
 let state = {
   currentUser: null,
   apiKey: localStorage.getItem('dsApiKey') || '',
-  inventory: [
-    // ══ 第一批入库（Sheet1，序号12-55）══
-    { id:1,  name:'记事贴',         category:'办公用品', qty:73,  safeQty:20, unit:'包', supplier:'', note:'第一批' },
-    { id:2,  name:'名字贴',         category:'办公用品', qty:38,  safeQty:10, unit:'包', supplier:'', note:'第一批' },
-    { id:3,  name:'小木子',         category:'办公用品', qty:5,   safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:4,  name:'起订器',         category:'办公用品', qty:38,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
-    { id:5,  name:'固体胶',         category:'办公用品', qty:19,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
-    { id:6,  name:'A4纸',           category:'办公用品', qty:44,  safeQty:20, unit:'包', supplier:'', note:'第一批' },
-    { id:7,  name:'A3纸',           category:'办公用品', qty:4,   safeQty:3,  unit:'包', supplier:'', note:'第一批' },
-    { id:8,  name:'订书机',         category:'办公用品', qty:10,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:9,  name:'计算器',         category:'办公用品', qty:1,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
-    { id:10, name:'伸缩美工刀',     category:'办公用品', qty:17,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:11, name:'桌面大笔筒',     category:'办公用品', qty:5,   safeQty:3,  unit:'个', supplier:'', note:'第一批' },
-    { id:12, name:'双面胶',         category:'办公用品', qty:45,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
-    { id:13, name:'中性笔（粗）',   category:'办公用品', qty:15,  safeQty:10, unit:'盒', supplier:'', note:'第一批' },
-    { id:14, name:'电池9v',         category:'办公用品', qty:7,   safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:15, name:'插板',           category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:16, name:'文件夹 蓝',      category:'办公用品', qty:13,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:17, name:'透明文件夹',     category:'办公用品', qty:16,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:18, name:'蓝色资料册 粘',  category:'办公用品', qty:19,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:19, name:'抽杆文件夹',     category:'办公用品', qty:9,   safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:20, name:'A4红纸',         category:'办公用品', qty:2,   safeQty:2,  unit:'包', supplier:'', note:'第一批' },
-    { id:21, name:'logo大本子',     category:'办公用品', qty:4,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
-    { id:22, name:'A4黄纸',         category:'办公用品', qty:23,  safeQty:5,  unit:'包', supplier:'', note:'第一批' },
-    { id:23, name:'A4绿纸',         category:'办公用品', qty:1,   safeQty:2,  unit:'包', supplier:'', note:'第一批' },
-    { id:24, name:'外科手术罩',     category:'安全防护', qty:5,   safeQty:5,  unit:'盒', supplier:'', note:'第一批' },
-    { id:25, name:'防护口罩',       category:'安全防护', qty:4.5, safeQty:3,  unit:'盒', supplier:'', note:'第一批' },
-    { id:26, name:'抹布',           category:'清洁用品', qty:2,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
-    { id:27, name:'枕套',           category:'其他',     qty:14,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:28, name:'清洁手套',       category:'清洁用品', qty:2,   safeQty:2,  unit:'双', supplier:'', note:'第一批' },
-    { id:29, name:'羽毛球',         category:'其他',     qty:9,   safeQty:5,  unit:'筒', supplier:'', note:'第一批' },
-    { id:30, name:'外科手套橡胶',   category:'安全防护', qty:2,   safeQty:2,  unit:'双', supplier:'', note:'第一批' },
-    { id:31, name:'一次性手套',     category:'安全防护', qty:2,   safeQty:2,  unit:'双', supplier:'', note:'第一批' },
-    { id:32, name:'红外测温计',     category:'医疗耗材', qty:3,   safeQty:2,  unit:'个', supplier:'', note:'第一批' },
-    { id:33, name:'较钞本',         category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:34, name:'装订铆管',       category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:35, name:'黑色铆盒',       category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:36, name:'佳能墨粉黄色',   category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:37, name:'佳能墨粉黑色',   category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:38, name:'佳能墨粉青色',   category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:39, name:'惠普墨粉品红色', category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:40, name:'板夹 黑',        category:'办公用品', qty:27,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    { id:41, name:'晾衣杆',         category:'其他',     qty:2,   safeQty:1,  unit:'个', supplier:'', note:'第一批' },
-    { id:42, name:'洁丽雅毛巾 白',  category:'清洁用品', qty:25,  safeQty:10, unit:'个', supplier:'', note:'第一批' },
-    { id:43, name:'厨房刀具',       category:'其他',     qty:1,   safeQty:1,  unit:'套', supplier:'', note:'第一批' },
-    { id:44, name:'烟灰缸',         category:'其他',     qty:18,  safeQty:5,  unit:'个', supplier:'', note:'第一批' },
-    // ══ 第二批归仓（序号1-61）══
-    { id:45, name:'力顿纸6.5寸 白', category:'办公用品', qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
-    { id:46, name:'快干印油红',     category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
-    { id:47, name:'抽针夹',         category:'办公用品', qty:30,  safeQty:10, unit:'个', supplier:'', note:'第二批' },
-    { id:48, name:'收纳箱带盖',     category:'其他',     qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:49, name:'信纸',           category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:50, name:'档案盒 蓝',      category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:51, name:'档案盒 深灰',    category:'办公用品', qty:10,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:52, name:'皮面笔记本 黑',  category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:53, name:'皮面笔记本 棕',  category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:54, name:'皮面笔记本 蓝',  category:'办公用品', qty:12,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:55, name:'百乐啫喱笔0.5黑',category:'办公用品', qty:20,  safeQty:10, unit:'支', supplier:'', note:'第二批' },
-    { id:56, name:'A4红纸（二批）', category:'办公用品', qty:1,   safeQty:2,  unit:'包', supplier:'', note:'第二批' },
-    { id:57, name:'严重洗手液',     category:'清洁用品', qty:1,   safeQty:2,  unit:'瓶', supplier:'', note:'第二批' },
-    { id:58, name:'插板（二批）',   category:'办公用品', qty:2,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
-    { id:59, name:'A4黄纸（二批）', category:'办公用品', qty:4,   safeQty:2,  unit:'包', supplier:'', note:'第二批' },
-    { id:60, name:'超拼垃圾袋',     category:'清洁用品', qty:200, safeQty:50, unit:'个', supplier:'', note:'第二批' },
-    { id:61, name:'削皮刀',         category:'其他',     qty:8,   safeQty:3,  unit:'把', supplier:'', note:'第二批' },
-    { id:62, name:'美工刀 黄',      category:'办公用品', qty:4,   safeQty:2,  unit:'把', supplier:'', note:'第二批' },
-    { id:63, name:'折叠便携小推车', category:'其他',     qty:1,   safeQty:1,  unit:'辆', supplier:'', note:'第二批' },
-    { id:64, name:'南孚7号电池',    category:'办公用品', qty:10,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:65, name:'液体胶水',       category:'办公用品', qty:24,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:66, name:'双刃剪刀',       category:'办公用品', qty:48,  safeQty:10, unit:'个', supplier:'', note:'第二批' },
-    { id:67, name:'桌面计算器',     category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
-    { id:68, name:'小米5号电池',    category:'办公用品', qty:100, safeQty:20, unit:'个', supplier:'', note:'第二批' },
-    { id:69, name:'希捷 移动硬盘',  category:'电子设备', qty:8,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
-    { id:70, name:'网格拉链袋',     category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:71, name:'激光笔',         category:'办公用品', qty:4,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
-    { id:72, name:'财务银行收滋章', category:'办公用品', qty:2,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
-    { id:73, name:'附件章',         category:'办公用品', qty:6,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
-    { id:74, name:'校准器',         category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
-    { id:75, name:'闪迪u盘64g',     category:'电子设备', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:76, name:'印台',           category:'办公用品', qty:5,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
-    { id:77, name:'半径麦克风 全向', category:'电子设备', qty:2,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
-    { id:78, name:'得力中性笔0.5',  category:'办公用品', qty:96,  safeQty:20, unit:'支', supplier:'', note:'第二批' },
-    { id:79, name:'得力剪刀',       category:'办公用品', qty:20,  safeQty:5,  unit:'把', supplier:'', note:'第二批' },
-    { id:80, name:'美工刀',         category:'办公用品', qty:20,  safeQty:5,  unit:'把', supplier:'', note:'第二批' },
-    { id:81, name:'扫把簸箕套装',   category:'清洁用品', qty:2,   safeQty:2,  unit:'套', supplier:'', note:'第二批' },
-    { id:82, name:'拖把',           category:'清洁用品', qty:2,   safeQty:2,  unit:'把', supplier:'', note:'第二批' },
-    { id:83, name:'起钉器',         category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:84, name:'固体胶（二批）', category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:85, name:'便利贴',         category:'办公用品', qty:5,   safeQty:2,  unit:'个', supplier:'', note:'第二批' },
-    { id:86, name:'订书机（二批）', category:'办公用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
-    { id:87, name:'回形针',         category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
-    { id:88, name:'彩色名片夹',     category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
-    { id:89, name:'尾票夹 简装',    category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
-    { id:90, name:'组合票夹',       category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
-    { id:91, name:'A4透明文件袋',   category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:92, name:'A4文件筐',       category:'办公用品', qty:30,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:93, name:'A4黄纸（三）',   category:'办公用品', qty:1,   safeQty:2,  unit:'包', supplier:'', note:'第二批' },
-    { id:94, name:'A4纸（二批）',   category:'办公用品', qty:55,  safeQty:20, unit:'包', supplier:'', note:'第二批' },
-    { id:95, name:'笔记本',         category:'办公用品', qty:20,  safeQty:5,  unit:'个', supplier:'', note:'第二批' },
-    { id:96, name:'晨光红色签字笔', category:'办公用品', qty:20,  safeQty:5,  unit:'盒', supplier:'', note:'第二批' },
-    { id:97, name:'保温壶',         category:'其他',     qty:1,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
-    { id:98, name:'电水壶',         category:'其他',     qty:4,   safeQty:1,  unit:'个', supplier:'', note:'第二批' },
-    { id:99, name:'复印纸',         category:'办公用品', qty:5,   safeQty:2,  unit:'箱', supplier:'', note:'第二批' },
-    { id:100,name:'圆形垃圾桶',     category:'清洁用品', qty:10,  safeQty:3,  unit:'个', supplier:'', note:'第二批' },
-    { id:101,name:'面巾抽纸',       category:'清洁用品', qty:2,   safeQty:2,  unit:'箱', supplier:'', note:'第二批' },
-    { id:102,name:'公牛排班',       category:'办公用品', qty:30,  safeQty:5,  unit:'电池', supplier:'', note:'第二批' },
-    { id:103,name:'硒鼓',           category:'办公用品', qty:3,   safeQty:1,  unit:'盒', supplier:'', note:'第二批' },
-    { id:104,name:'三菱红笔0.5',    category:'办公用品', qty:24,  safeQty:5,  unit:'支', supplier:'', note:'第二批' },
-    { id:105,name:'三菱黑笔0.5',    category:'办公用品', qty:12,  safeQty:5,  unit:'支', supplier:'', note:'第二批' },
-  ],
+  inventory: [],
   transactions: [],
   requests: [],
-  nextId: { item:106, trans:1, req:1 },
-  logs: [
-    { time:'2025-05-09 09:00', type:'入库', item:'第一批物资（44项）', qty:'-', user:'system' },
-    { time:'2025-05-09 09:01', type:'入库', item:'第二批物资（61项）', qty:'-', user:'system' },
-  ]
+  logs: [],
 };
 
 let selectedRole = 'admin';
 let activePanel = '';
+let unsubscribers = [];
+
+// ===== LOADING SCREEN =====
+function showLoading(msg) {
+  let el = document.getElementById('loadingOverlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loadingOverlay';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(13,17,23,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;';
+    el.innerHTML = '<div style="width:40px;height:40px;border:3px solid #30363d;border-top-color:#3fb950;border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="color:#8b949e;font-size:14px" id="loadingMsg"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(el);
+  }
+  document.getElementById('loadingMsg').textContent = msg;
+  el.style.display = 'flex';
+}
+function hideLoading() {
+  const el = document.getElementById('loadingOverlay');
+  if (el) el.style.display = 'none';
+}
+
+// ===== FIRESTORE HELPERS =====
+async function fsInit() {
+  // Check if inventory is already seeded
+  showLoading('正在连接数据库…');
+  const snap = await getDocs(collection(db, 'inventory'));
+  if (snap.empty) {
+    showLoading('首次初始化物资数据…');
+    for (const item of INITIAL_INVENTORY) {
+      await setDoc(doc(db, 'inventory', item.id), item);
+    }
+  }
+  hideLoading();
+}
+
+function subscribeAll() {
+  // Unsubscribe previous listeners
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
+
+  // Inventory
+  unsubscribers.push(onSnapshot(collection(db, 'inventory'), snap => {
+    state.inventory = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    state.inventory.sort((a, b) => Number(a.id) - Number(b.id));
+    if (activePanel === 'dashboard') renderDashboard();
+    if (activePanel === 'inventory') renderInventory();
+    if (activePanel === 'user-browse') renderUserBrowse();
+    updateTransSelects();
+  }));
+
+  // Transactions
+  unsubscribers.push(onSnapshot(query(collection(db, 'transactions'), orderBy('time', 'desc')), snap => {
+    state.transactions = snap.docs.map(d => ({ ...d.data(), fsId: d.id }));
+    if (activePanel === 'transactions') renderTransactions();
+    if (activePanel === 'dashboard') renderDashboard();
+  }));
+
+  // Requests
+  unsubscribers.push(onSnapshot(query(collection(db, 'requests'), orderBy('time', 'desc')), snap => {
+    state.requests = snap.docs.map(d => ({ ...d.data(), fsId: d.id }));
+    if (activePanel === 'requests') renderAdminRequests();
+    if (activePanel === 'user-requests') renderUserRequests();
+    if (activePanel === 'dashboard') renderDashboard();
+    updateNavBadge();
+  }));
+
+  // Logs
+  unsubscribers.push(onSnapshot(query(collection(db, 'logs'), orderBy('time', 'desc')), snap => {
+    state.logs = snap.docs.map(d => d.data());
+    if (activePanel === 'dashboard') renderDashboard();
+  }));
+}
+
+function updateTransSelects() {
+  const s1 = document.getElementById('transItem');
+  const s2 = document.getElementById('reqItem');
+  if (s1) s1.innerHTML = state.inventory.map(i => `<option value="${i.id}">${i.name}（库存：${i.qty}${i.unit}）</option>`).join('');
+  if (s2) s2.innerHTML = state.inventory.map(i => `<option value="${i.id}">${i.name}（库存：${i.qty}${i.unit}）</option>`).join('');
+}
 
 // ===== AUTH =====
 function setRole(r) {
@@ -1128,7 +1221,7 @@ function setRole(r) {
   });
 }
 
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
   const err = document.getElementById('loginError');
@@ -1138,15 +1231,22 @@ function doLogin() {
     return;
   }
   err.style.display = 'none';
+  showLoading('登录中…');
+  await fsInit();
   state.currentUser = { ...usr, username: u };
   document.getElementById('login-page').classList.remove('active');
   document.getElementById('app-page').classList.add('active');
+  subscribeAll();
   setupSidebar();
   if (state.apiKey) document.getElementById('apiKeyInput').value = state.apiKey;
+  hideLoading();
 }
 
 function doLogout() {
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
   state.currentUser = null;
+  state.inventory = []; state.transactions = []; state.requests = []; state.logs = [];
   document.getElementById('app-page').classList.remove('active');
   document.getElementById('login-page').classList.add('active');
   document.getElementById('loginUser').value = '';
@@ -1171,7 +1271,7 @@ function setupSidebar() {
         <button class="nav-item" onclick="switchPanel('transactions')"><span class="nav-icon">📋</span><span>出入库记录</span></button>
         <button class="nav-item" onclick="switchPanel('requests')">
           <span class="nav-icon">📬</span><span>物资申请</span>
-          <span class="nav-badge" id="navReqBadge">0</span>
+          <span class="nav-badge" id="navReqBadge" style="display:none">0</span>
         </button>
       </div>
       <div class="nav-section">
@@ -1210,8 +1310,8 @@ function switchPanel(name) {
 // ===== DASHBOARD =====
 function renderDashboard() {
   const inv = state.inventory;
-  const low = inv.filter(i => i.qty < i.safeQty);
-  const critical = inv.filter(i => i.qty === 0);
+  const low = inv.filter(i => Number(i.qty) < Number(i.safeQty));
+  const critical = inv.filter(i => Number(i.qty) === 0);
   const pending = state.requests.filter(r => r.status === 'pending');
 
   document.getElementById('dashStats').innerHTML = `
@@ -1222,59 +1322,38 @@ function renderDashboard() {
   `;
 
   let alerts = '';
-  if (critical.length > 0) {
-    alerts += `<div class="alert-banner alert-red"><span class="alert-icon">🚨</span><div class="alert-text"><div class="alert-title">紧急：以下物资已零库存！</div>${critical.map(i=>i.name).join('、')} 需立即补充</div></div>`;
-  }
-  if (low.length > 0) {
-    alerts += `<div class="alert-banner"><span class="alert-icon">⚠️</span><div class="alert-text"><div class="alert-title">库存预警：${low.length} 种物资低于安全库存</div>${low.map(i=>`${i.name}（剩余${i.qty}${i.unit}，安全阈值${i.safeQty}${i.unit}）`).join('；')}</div></div>`;
-  }
-  if (pending.length > 0) {
-    alerts += `<div class="alert-banner" style="border-color:var(--blue);background:var(--blue-dim)"><span class="alert-icon">📬</span><div class="alert-text" style="color:var(--blue)"><div class="alert-title">有 ${pending.length} 条物资申请待审核</div>${pending.map(r=>`${r.userName}申请${getItemName(r.itemId)}×${r.qty}`).join('；')}</div></div>`;
-  }
+  if (critical.length > 0) alerts += `<div class="alert-banner alert-red"><span class="alert-icon">🚨</span><div class="alert-text"><div class="alert-title">紧急：以下物资已零库存！</div>${critical.map(i=>i.name).join('、')} 需立即补充</div></div>`;
+  if (low.length > 0) alerts += `<div class="alert-banner"><span class="alert-icon">⚠️</span><div class="alert-text"><div class="alert-title">库存预警：${low.length} 种物资低于安全库存</div>${low.map(i=>`${i.name}（剩余${i.qty}${i.unit}，安全阈值${i.safeQty}${i.unit}）`).join('；')}</div></div>`;
+  if (pending.length > 0) alerts += `<div class="alert-banner" style="border-color:var(--blue);background:var(--blue-dim)"><span class="alert-icon">📬</span><div class="alert-text" style="color:var(--blue)"><div class="alert-title">有 ${pending.length} 条物资申请待审核</div>${pending.map(r=>`${r.userName}申请${getItemName(r.itemId)}×${r.qty}`).join('；')}</div></div>`;
   document.getElementById('alertsContainer').innerHTML = alerts;
 
-  // Stock bars
   document.getElementById('stockBars').innerHTML = inv.map(item => {
-    const pct = Math.min(100, Math.round((item.qty / Math.max(item.safeQty * 1.5, 1)) * 100));
-    const color = item.qty === 0 ? 'red' : item.qty < item.safeQty ? 'amber' : 'green';
-    return `<div style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span style="font-size:13px">${item.name}</span>
-        <span class="text-mono" style="color:var(--${color})">${item.qty} ${item.unit} / 安全${item.safeQty}${item.unit}</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill ${color}" style="width:${pct}%"></div></div>
-    </div>`;
+    const pct = Math.min(100, Math.round((Number(item.qty) / Math.max(Number(item.safeQty) * 1.5, 1)) * 100));
+    const color = Number(item.qty) === 0 ? 'red' : Number(item.qty) < Number(item.safeQty) ? 'amber' : 'green';
+    return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:13px">${item.name}</span><span class="text-mono" style="color:var(--${color})">${item.qty} ${item.unit} / 安全${item.safeQty}${item.unit}</span></div><div class="progress-bar"><div class="progress-fill ${color}" style="width:${pct}%"></div></div></div>`;
   }).join('');
 
-  document.getElementById('recentLogs').innerHTML = state.logs.slice(-8).reverse().map(l => `
+  document.getElementById('recentLogs').innerHTML = state.logs.slice(0, 8).map(l => `
     <tr><td class="text-mono">${l.time}</td><td>${l.type==='入库'?'<span class="badge badge-green">入库</span>':l.type==='出库'?'<span class="badge badge-amber">出库</span>':'<span class="badge badge-blue">申请</span>'}</td><td>${l.item}</td><td>${l.qty}</td><td>${l.user}</td></tr>
   `).join('');
 }
 
-function refreshDashboard() {
-  renderDashboard();
-  showToast('success', '数据已刷新', '仪表盘数据更新完成');
-}
+function refreshDashboard() { renderDashboard(); showToast('success', '数据已刷新', ''); }
 
 // ===== INVENTORY =====
 function renderInventory(filter='') {
   const items = state.inventory.filter(i => !filter || i.name.includes(filter) || i.category.includes(filter));
   document.getElementById('inventoryTable').innerHTML = items.map(item => {
-    const status = item.qty === 0 ? '<span class="badge badge-red">零库存</span>' :
-                   item.qty < item.safeQty ? '<span class="badge badge-amber">库存不足</span>' :
-                   '<span class="badge badge-green">正常</span>';
+    const status = Number(item.qty) === 0 ? '<span class="badge badge-red">零库存</span>' : Number(item.qty) < Number(item.safeQty) ? '<span class="badge badge-amber">库存不足</span>' : '<span class="badge badge-green">正常</span>';
     return `<tr>
       <td><strong>${item.name}</strong>${item.note?`<div class="text-sm text-muted">${item.note}</div>`:''}</td>
       <td><span class="badge badge-teal">${item.category}</span></td>
-      <td class="text-mono" style="color:${item.qty<item.safeQty?'var(--amber)':'var(--text)'}">${item.qty}</td>
-      <td class="text-mono">${item.safeQty}</td>
-      <td>${item.unit}</td>
-      <td>${status}</td>
+      <td class="text-mono" style="color:${Number(item.qty)<Number(item.safeQty)?'var(--amber)':'var(--text)'}">${item.qty}</td>
+      <td class="text-mono">${item.safeQty}</td><td>${item.unit}</td><td>${status}</td>
       <td><div class="flex-gap">
-        <button class="btn btn-secondary btn-sm" onclick="openEditItemModal(${item.id})">✏️ 编辑</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">🗑️</button>
-      </div></td>
-    </tr>`;
+        <button class="btn btn-secondary btn-sm" onclick="openEditItemModal('${item.id}')">✏️ 编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}')">🗑️</button>
+      </div></td></tr>`;
   }).join('');
 }
 
@@ -1303,129 +1382,100 @@ function openEditItemModal(id) {
   openModal('itemModal');
 }
 
-function saveItem() {
+async function saveItem() {
   const name = document.getElementById('itemName').value.trim();
-  const qty = parseInt(document.getElementById('itemQty').value);
-  const safeQty = parseInt(document.getElementById('itemSafeQty').value);
+  const qty = parseFloat(document.getElementById('itemQty').value);
+  const safeQty = parseFloat(document.getElementById('itemSafeQty').value);
   if (!name || isNaN(qty) || isNaN(safeQty)) { showToast('error', '请填写必填项', '名称、库存和安全阈值为必填'); return; }
-  const editId = parseInt(document.getElementById('editItemId').value);
-  const data = {
-    name, qty, safeQty,
-    category: document.getElementById('itemCategory').value,
-    unit: document.getElementById('itemUnit').value || '个',
-    supplier: document.getElementById('itemSupplier').value,
-    note: document.getElementById('itemNote').value,
-  };
+  const editId = document.getElementById('editItemId').value;
+  const data = { name, qty, safeQty, category: document.getElementById('itemCategory').value, unit: document.getElementById('itemUnit').value || '个', supplier: document.getElementById('itemSupplier').value, note: document.getElementById('itemNote').value };
+  showLoading('保存中…');
   if (editId) {
-    const idx = state.inventory.findIndex(i => i.id === editId);
-    state.inventory[idx] = { ...state.inventory[idx], ...data };
+    await updateDoc(doc(db, 'inventory', editId), data);
     showToast('success', '物资已更新', `${name} 信息已修改`);
   } else {
-    state.inventory.push({ id: state.nextId.item++, ...data });
-    addLog('入库', name, qty, state.currentUser.username);
+    const newId = String(Date.now());
+    await setDoc(doc(db, 'inventory', newId), { id: newId, ...data });
+    await addLog('入库', name, qty, state.currentUser.username);
     showToast('success', '物资已添加', `${name} 已加入物资库`);
   }
+  hideLoading();
   closeModal('itemModal');
-  renderInventory();
-  updateNavBadge();
 }
 
-function deleteItem(id) {
+async function deleteItem(id) {
   const item = state.inventory.find(i => i.id === id);
   if (!item) return;
   if (!confirm(`确认删除物资"${item.name}"？此操作不可撤销。`)) return;
-  state.inventory = state.inventory.filter(i => i.id !== id);
-  renderInventory();
+  await deleteDoc(doc(db, 'inventory', id));
   showToast('success', '已删除', `${item.name} 已从物资库移除`);
 }
 
 // ===== TRANSACTIONS =====
 function renderTransactions() {
-  document.getElementById('transactionTable').innerHTML = [...state.transactions].reverse().map(t => {
+  document.getElementById('transactionTable').innerHTML = state.transactions.map(t => {
     const item = state.inventory.find(i => i.id === t.itemId);
-    return `<tr>
-      <td class="text-mono text-sm">${t.time}</td>
-      <td>${t.type==='in'?'<span class="badge badge-green">📥 入库</span>':'<span class="badge badge-amber">📤 出库</span>'}</td>
-      <td>${item ? item.name : '已删除'}</td>
-      <td class="text-mono">${t.qty} ${item ? item.unit : ''}</td>
-      <td>${t.operator}</td>
-      <td class="text-muted text-sm">${t.note}</td>
-    </tr>`;
+    return `<tr><td class="text-mono text-sm">${t.time}</td><td>${t.type==='in'?'<span class="badge badge-green">📥 入库</span>':'<span class="badge badge-amber">📤 出库</span>'}</td><td>${item ? item.name : t.itemName||'已删除'}</td><td class="text-mono">${t.qty} ${item ? item.unit : ''}</td><td>${t.operator}</td><td class="text-muted text-sm">${t.note}</td></tr>`;
   }).join('');
 }
 
 function openTransactionModal() {
-  const sel = document.getElementById('transItem');
-  sel.innerHTML = state.inventory.map(i => `<option value="${i.id}">${i.name}（库存：${i.qty}${i.unit}）</option>`).join('');
+  updateTransSelects();
   document.getElementById('transQty').value = '';
   document.getElementById('transNote').value = '';
   document.getElementById('transOperator').value = state.currentUser.name;
   openModal('transModal');
 }
 
-function saveTransaction() {
+async function saveTransaction() {
   const type = document.getElementById('transType').value;
-  const itemId = parseInt(document.getElementById('transItem').value);
-  const qty = parseInt(document.getElementById('transQty').value);
+  const itemId = document.getElementById('transItem').value;
+  const qty = parseFloat(document.getElementById('transQty').value);
   if (!itemId || isNaN(qty) || qty <= 0) { showToast('error', '请填写完整', '物资和数量为必填'); return; }
   const item = state.inventory.find(i => i.id === itemId);
   if (!item) return;
-  if (type === 'out' && qty > item.qty) { showToast('error', '库存不足', `当前库存仅${item.qty}${item.unit}`); return; }
-  if (type === 'in') item.qty += qty;
-  else item.qty -= qty;
-
+  if (type === 'out' && qty > Number(item.qty)) { showToast('error', '库存不足', `当前库存仅${item.qty}${item.unit}`); return; }
+  const newQty = type === 'in' ? Number(item.qty) + qty : Number(item.qty) - qty;
   const now = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-').slice(0, 16);
-  state.transactions.push({ id: state.nextId.trans++, type, itemId, qty, operator: document.getElementById('transOperator').value || state.currentUser.name, note: document.getElementById('transNote').value, time: now });
-  addLog(type === 'in' ? '入库' : '出库', item.name, qty, state.currentUser.username);
+  const operator = document.getElementById('transOperator').value || state.currentUser.name;
+  const note = document.getElementById('transNote').value;
+  showLoading('记录中…');
+  await updateDoc(doc(db, 'inventory', itemId), { qty: newQty });
+  await addDoc(collection(db, 'transactions'), { type, itemId, itemName: item.name, qty, operator, note, time: now });
+  await addLog(type === 'in' ? '入库' : '出库', item.name, qty, state.currentUser.username);
+  hideLoading();
   showToast('success', '记录成功', `${item.name} ${type==='in'?'入库':'出库'} ${qty}${item.unit}`);
   closeModal('transModal');
-  renderTransactions();
-  updateNavBadge();
 }
 
 // ===== ADMIN REQUESTS =====
 function renderAdminRequests() {
   const pending = state.requests.filter(r => r.status === 'pending').length;
   document.getElementById('pendingBadge').textContent = `待审核：${pending}`;
-  document.getElementById('requestsTable').innerHTML = [...state.requests].reverse().map(r => {
+  document.getElementById('requestsTable').innerHTML = state.requests.map(r => {
     const item = state.inventory.find(i => i.id === r.itemId);
-    const statusBadge = r.status === 'pending' ? '<span class="badge badge-amber">待审核</span>' :
-                         r.status === 'approved' ? '<span class="badge badge-green">已通过</span>' :
-                         '<span class="badge badge-red">已拒绝</span>';
-    const actions = r.status === 'pending' ? `
-      <div class="flex-gap">
-        <button class="btn btn-secondary btn-sm" onclick="handleRequest(${r.id},'approved')">✅ 通过</button>
-        <button class="btn btn-danger btn-sm" onclick="handleRequest(${r.id},'rejected')">❌ 拒绝</button>
-      </div>` : `<span class="text-sm text-muted">${r.adminNote || '-'}</span>`;
-    return `<tr>
-      <td class="text-mono text-sm">${r.time}</td>
-      <td>${r.userName}</td>
-      <td>${item ? item.name : '已删除'}</td>
-      <td class="text-mono">${r.qty} ${item ? item.unit : ''}</td>
-      <td class="text-sm">${r.reason}</td>
-      <td>${statusBadge}</td>
-      <td>${actions}</td>
-    </tr>`;
+    const statusBadge = r.status === 'pending' ? '<span class="badge badge-amber">待审核</span>' : r.status === 'approved' ? '<span class="badge badge-green">已通过</span>' : '<span class="badge badge-red">已拒绝</span>';
+    const actions = r.status === 'pending' ? `<div class="flex-gap"><button class="btn btn-secondary btn-sm" onclick="handleRequest('${r.fsId}','approved')">✅ 通过</button><button class="btn btn-danger btn-sm" onclick="handleRequest('${r.fsId}','rejected')">❌ 拒绝</button></div>` : `<span class="text-sm text-muted">${r.adminNote || '-'}</span>`;
+    return `<tr><td class="text-mono text-sm">${r.time}</td><td>${r.userName}</td><td>${item ? item.name : r.itemName||'已删除'}</td><td class="text-mono">${r.qty} ${item ? item.unit : ''}</td><td class="text-sm">${r.reason}</td><td>${statusBadge}</td><td>${actions}</td></tr>`;
   }).join('');
   updateNavBadge();
 }
 
-function handleRequest(id, action) {
-  const req = state.requests.find(r => r.id === id);
+async function handleRequest(fsId, action) {
+  const req = state.requests.find(r => r.fsId === fsId);
   if (!req) return;
   const note = action === 'approved' ? '已审批通过，请凭单至仓库领取' : '申请未通过，请联系管理员了解详情';
-  req.status = action;
-  req.adminNote = note;
-  const item = state.inventory.find(i => i.id === req.itemId);
-  if (action === 'approved' && item) {
-    if (item.qty >= req.qty) {
-      item.qty -= req.qty;
-      addLog('出库', item.name, req.qty, state.currentUser.username);
+  showLoading('处理中…');
+  await updateDoc(doc(db, 'requests', fsId), { status: action, adminNote: note });
+  if (action === 'approved') {
+    const item = state.inventory.find(i => i.id === req.itemId);
+    if (item && Number(item.qty) >= Number(req.qty)) {
+      await updateDoc(doc(db, 'inventory', req.itemId), { qty: Number(item.qty) - Number(req.qty) });
+      await addLog('出库', item.name, req.qty, state.currentUser.username);
     }
   }
+  hideLoading();
   showToast('success', action === 'approved' ? '申请已通过' : '申请已拒绝', `${req.userName} 的申请已处理`);
-  renderAdminRequests();
-  updateNavBadge();
 }
 
 // ===== USER REQUESTS =====
@@ -1433,70 +1483,48 @@ function renderUserRequests() {
   const myReqs = state.requests.filter(r => r.user === state.currentUser.username);
   document.getElementById('userRequestsTable').innerHTML = myReqs.length === 0
     ? '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:2rem">暂无申请记录，点击右上角"提交申请"按钮</td></tr>'
-    : [...myReqs].reverse().map(r => {
-      const item = state.inventory.find(i => i.id === r.itemId);
-      const statusBadge = r.status === 'pending' ? '<span class="badge badge-amber">⏳ 审核中</span>' :
-                           r.status === 'approved' ? '<span class="badge badge-green">✅ 已通过</span>' :
-                           '<span class="badge badge-red">❌ 已拒绝</span>';
-      return `<tr>
-        <td class="text-mono text-sm">${r.time}</td>
-        <td>${item ? item.name : '已删除'}</td>
-        <td class="text-mono">${r.qty} ${item ? item.unit : ''}</td>
-        <td class="text-sm">${r.reason}</td>
-        <td>${statusBadge}</td>
-        <td class="text-sm text-muted">${r.adminNote || '-'}</td>
-      </tr>`;
-    }).join('');
+    : myReqs.map(r => {
+        const item = state.inventory.find(i => i.id === r.itemId);
+        const statusBadge = r.status === 'pending' ? '<span class="badge badge-amber">⏳ 审核中</span>' : r.status === 'approved' ? '<span class="badge badge-green">✅ 已通过</span>' : '<span class="badge badge-red">❌ 已拒绝</span>';
+        return `<tr><td class="text-mono text-sm">${r.time}</td><td>${item ? item.name : r.itemName||'已删除'}</td><td class="text-mono">${r.qty} ${item ? item.unit : ''}</td><td class="text-sm">${r.reason}</td><td>${statusBadge}</td><td class="text-sm text-muted">${r.adminNote || '-'}</td></tr>`;
+      }).join('');
 }
 
 function openUserRequestModal() {
-  const sel = document.getElementById('reqItem');
-  sel.innerHTML = state.inventory.map(i => `<option value="${i.id}">${i.name}（库存：${i.qty}${i.unit}）</option>`).join('');
+  updateTransSelects();
   document.getElementById('reqQty').value = '';
   document.getElementById('reqReason').value = '';
   document.getElementById('reqDept').value = '';
   openModal('userReqModal');
 }
 
-function submitUserRequest() {
-  const itemId = parseInt(document.getElementById('reqItem').value);
-  const qty = parseInt(document.getElementById('reqQty').value);
+async function submitUserRequest() {
+  const itemId = document.getElementById('reqItem').value;
+  const qty = parseFloat(document.getElementById('reqQty').value);
   const reason = document.getElementById('reqReason').value.trim();
   if (!itemId || isNaN(qty) || qty <= 0 || !reason) { showToast('error', '请填写完整', '物资、数量和理由为必填'); return; }
-  const now = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-').slice(0, 16);
-  state.requests.push({ id: state.nextId.req++, user: state.currentUser.username, userName: state.currentUser.name, itemId, qty, dept: document.getElementById('reqDept').value, reason, status: 'pending', adminNote: '', time: now });
   const item = state.inventory.find(i => i.id === itemId);
-  addLog('申请', item ? item.name : '物资', qty, state.currentUser.username);
+  const now = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-').slice(0, 16);
+  showLoading('提交中…');
+  await addDoc(collection(db, 'requests'), { user: state.currentUser.username, userName: state.currentUser.name, itemId, itemName: item ? item.name : '', qty, dept: document.getElementById('reqDept').value, reason, status: 'pending', adminNote: '', time: now });
+  await addLog('申请', item ? item.name : '物资', qty, state.currentUser.username);
+  hideLoading();
   showToast('success', '申请已提交', '管理员将尽快审核您的申请');
   closeModal('userReqModal');
-  renderUserRequests();
-  updateNavBadge();
 }
 
 function renderUserBrowse() {
   document.getElementById('userBrowseGrid').innerHTML = state.inventory.map(item => {
-    const statusColor = item.qty === 0 ? 'red' : item.qty < item.safeQty ? 'amber' : 'green';
-    const statusText = item.qty === 0 ? '零库存' : item.qty < item.safeQty ? '库存偏低' : '充足';
-    return `<div class="card" style="cursor:pointer" onclick="prefillRequest(${item.id})">
-      <div style="padding:1.25rem">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-          <div>
-            <div style="font-weight:600;font-size:14px">${item.name}</div>
-            <div class="text-sm text-muted">${item.category}</div>
-          </div>
-          <span class="badge badge-${statusColor}">${statusText}</span>
-        </div>
-        <div style="font-size:24px;font-weight:700;color:var(--${statusColor});font-family:'JetBrains Mono',monospace">${item.qty}<span style="font-size:13px;font-weight:400;color:var(--text3);margin-left:4px">${item.unit}</span></div>
-        ${item.supplier ? `<div class="text-sm text-muted" style="margin-top:6px">📦 ${item.supplier}</div>` : ''}
-        <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;justify-content:center">点击申请此物资</button>
-      </div>
-    </div>`;
+    const statusColor = Number(item.qty) === 0 ? 'red' : Number(item.qty) < Number(item.safeQty) ? 'amber' : 'green';
+    const statusText = Number(item.qty) === 0 ? '零库存' : Number(item.qty) < Number(item.safeQty) ? '库存偏低' : '充足';
+    return `<div class="card" style="cursor:pointer" onclick="prefillRequest('${item.id}')"><div style="padding:1.25rem"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-weight:600;font-size:14px">${item.name}</div><div class="text-sm text-muted">${item.category}</div></div><span class="badge badge-${statusColor}">${statusText}</span></div><div style="font-size:24px;font-weight:700;color:var(--${statusColor});font-family:'JetBrains Mono',monospace">${item.qty}<span style="font-size:13px;font-weight:400;color:var(--text3);margin-left:4px">${item.unit}</span></div><button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;justify-content:center">点击申请此物资</button></div></div>`;
   }).join('');
 }
 
 function prefillRequest(itemId) {
+  updateTransSelects();
   const sel = document.getElementById('reqItem');
-  sel.innerHTML = state.inventory.map(i => `<option value="${i.id}" ${i.id===itemId?'selected':''}>${i.name}（库存：${i.qty}${i.unit}）</option>`).join('');
+  if (sel) sel.value = itemId;
   document.getElementById('reqQty').value = '';
   document.getElementById('reqReason').value = '';
   document.getElementById('reqDept').value = '';
@@ -1516,77 +1544,38 @@ async function testApiKey() {
   if (!key) { showToast('error', '请先输入 API Key', ''); return; }
   showToast('success', '正在测试连接...', '请稍候');
   try {
-    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-      body: JSON.stringify({ model: 'deepseek-chat', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] })
-    });
-    if (res.ok) showToast('success', '连接成功 ✓', 'API Key 有效，可正常使用');
-    else showToast('error', '连接失败', `HTTP ${res.status}，请检查 API Key`);
-  } catch (e) {
-    showToast('error', '网络错误', '请检查网络或 API Key 是否正确');
-  }
+    const res = await fetch('https://api.deepseek.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` }, body: JSON.stringify({ model: 'deepseek-chat', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] }) });
+    if (res.ok) showToast('success', '连接成功 ✓', 'API Key 有效');
+    else showToast('error', '连接失败', `HTTP ${res.status}`);
+  } catch (e) { showToast('error', '网络错误', e.message); }
 }
 
-function handleChatKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-}
+function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } }
 
 async function sendChatMessage() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
   if (!msg) return;
-  if (!state.apiKey) { showToast('error', '未配置 API Key', '请先在上方配置 DeepSeek API Key'); return; }
+  if (!state.apiKey) { showToast('error', '未配置 API Key', '请先配置 DeepSeek API Key'); return; }
   input.value = '';
   appendMessage('user', msg);
-
-  // Build context
-  const inventoryContext = state.inventory.map(i =>
-    `${i.name}：库存${i.qty}${i.unit}，安全阈值${i.safeQty}${i.unit}，状态：${i.qty===0?'零库存':i.qty<i.safeQty?'不足':'正常'}`
-  ).join('\n');
+  const inventoryContext = state.inventory.map(i => `${i.name}：库存${i.qty}${i.unit}，安全阈值${i.safeQty}${i.unit}，状态：${Number(i.qty)===0?'零库存':Number(i.qty)<Number(i.safeQty)?'不足':'正常'}`).join('\n');
   const pendingReqs = state.requests.filter(r => r.status === 'pending').length;
-
-  const systemPrompt = `你是一个专业的企业后勤物资管理助手。当前库存状况如下：
-${inventoryContext}
-待处理申请数量：${pendingReqs}
-请根据上述实时数据，用简洁专业的中文回答用户问题，提供切实可行的管理建议。`;
-
+  const systemPrompt = `你是一个专业的企业后勤物资管理助手。当前库存状况如下：\n${inventoryContext}\n待处理申请数量：${pendingReqs}\n请根据上述实时数据，用简洁专业的中文回答用户问题，提供切实可行的管理建议。`;
   const typing = appendTyping();
   try {
-    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}` },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        max_tokens: 600,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: msg }
-        ]
-      })
-    });
+    const res = await fetch('https://api.deepseek.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey}` }, body: JSON.stringify({ model: 'deepseek-chat', max_tokens: 600, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: msg }] }) });
     typing.remove();
-    if (res.ok) {
-      const data = await res.json();
-      const reply = data.choices?.[0]?.message?.content || '抱歉，未能获取回复';
-      appendMessage('ai', reply);
-    } else {
-      const err = await res.json().catch(() => ({}));
-      appendMessage('ai', `❌ 请求失败（${res.status}）：${err.error?.message || '请检查 API Key 是否有效'}`);
-    }
-  } catch (e) {
-    typing.remove();
-    appendMessage('ai', `❌ 网络错误：${e.message}。请确认网络连接正常，或检查浏览器是否允许跨域请求。`);
-  }
+    if (res.ok) { const data = await res.json(); appendMessage('ai', data.choices?.[0]?.message?.content || '抱歉，未能获取回复'); }
+    else { const err = await res.json().catch(() => ({})); appendMessage('ai', `❌ 请求失败（${res.status}）：${err.error?.message || '请检查 API Key'}`); }
+  } catch (e) { typing.remove(); appendMessage('ai', `❌ 网络错误：${e.message}`); }
 }
 
 function appendMessage(role, text) {
   const container = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = `msg ${role}`;
-  div.innerHTML = `
-    <div class="msg-avatar">${role === 'ai' ? '🤖' : '👤'}</div>
-    <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>`;
+  div.innerHTML = `<div class="msg-avatar">${role === 'ai' ? '🤖' : '👤'}</div><div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>`;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
   return div;
@@ -1608,10 +1597,9 @@ function getItemName(id) {
   return item ? item.name : '未知物资';
 }
 
-function addLog(type, item, qty, user) {
+async function addLog(type, item, qty, user) {
   const now = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-').slice(0, 16);
-  state.logs.push({ time: now, type, item, qty, user });
-  if (state.logs.length > 50) state.logs.shift();
+  await addDoc(collection(db, 'logs'), { time: now, type, item, qty, user });
 }
 
 function updateNavBadge() {
@@ -1637,7 +1625,9 @@ function showToast(type, title, body) {
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3500);
 }
 
-// Login on Enter
+// Expose functions to global scope (needed for onclick handlers with type="module")
+Object.assign(window, { setRole, doLogin, doLogout, switchPanel, refreshDashboard, filterInventory, openAddItemModal, openEditItemModal, saveItem, deleteItem, openTransactionModal, saveTransaction, handleRequest, openUserRequestModal, submitUserRequest, prefillRequest, renderUserBrowse, saveApiKey, testApiKey, handleChatKey, sendChatMessage, openModal, closeModal });
+
 document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 </script>
 </body>
